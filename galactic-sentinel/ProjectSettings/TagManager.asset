@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Ground
   - Turret
+  - Enemy
+  - Turret Platform
   layers:
   - Default
   - TransparentFX
@@ -16,8 +18,8 @@ TagManager:
   - Player
   - Ground
   - Turret
-  - 
-  - 
+  - Enemies
+  - TurretPlatform
   - 
   - 
   - 
