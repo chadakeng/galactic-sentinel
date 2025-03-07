@@ -7,14 +7,22 @@ public class PlayerShooting : MonoBehaviour
     public float damage = 20f;
     public LayerMask enemyLayer;
     public LayerMask turretPlatformLayer;
+        
+    public float fireRate = 0.2f; // Delay between shots
+    private float nextTimeToShoot = 0f; // Tracks when player can shoot next
+
 
     public int turretCost = 50;
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // Left Click to Shoot
+        if (Input.GetMouseButton(0)) // Hold Left Click to continuously shoot
         {
-            Shoot();
+            if (Time.time >= nextTimeToShoot)
+            {
+                nextTimeToShoot = Time.time + fireRate;
+                Shoot();
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.F)) // Press 'F' to buy and place a turret
