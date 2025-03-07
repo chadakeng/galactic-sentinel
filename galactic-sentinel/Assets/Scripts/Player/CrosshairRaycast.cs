@@ -11,7 +11,7 @@ public class CrosshairRaycast : MonoBehaviour
     private void Start()
     {
         // Find all objects with Outline and disable them at the start
-        Outline[] allOutlines = FindObjectsOfType<Outline>();
+        Outline[] allOutlines = FindObjectsByType<Outline>(FindObjectsSortMode.None);
         foreach (Outline outline in allOutlines)
         {
             outline.enabled = false; // Ensure all objects start without highlight
