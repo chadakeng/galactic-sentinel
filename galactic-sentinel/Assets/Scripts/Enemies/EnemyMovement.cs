@@ -25,7 +25,7 @@ public class EnemyMovement : MonoBehaviour
         }
 
         playerCore = GameObject.FindGameObjectWithTag("Player")?.transform;
-        
+
         if (playerCore == null)
         {
             Debug.LogError("Player (Core) not found! Make sure the Player has the 'Player' tag.");
@@ -33,7 +33,7 @@ public class EnemyMovement : MonoBehaviour
 
         if (enemyType == EnemyType.Fast)
         {
-            agent.SetDestination(playerCore.position);
+            agent.SetDestination(playerCore.position); // Fast enemies go directly to core
         }
     }
 
@@ -41,7 +41,7 @@ public class EnemyMovement : MonoBehaviour
     {
         if (enemyType == EnemyType.Regular)
         {
-            FindClosestTarget();
+            FindClosestTarget(); // Always check for the closest target
 
             if (currentTarget != null)
             {
@@ -50,7 +50,7 @@ public class EnemyMovement : MonoBehaviour
                 if (distance <= attackRange)
                 {
                     Attack(currentTarget.gameObject);
-                    agent.isStopped = true;
+                    agent.isStopped = true;  // Stop moving when attacking
                 }
                 else
                 {
@@ -58,35 +58,41 @@ public class EnemyMovement : MonoBehaviour
                     agent.isStopped = false;
                 }
             }
+            else
+            {
+                agent.SetDestination(playerCore.position);
+            }
         }
     }
 
     void FindClosestTarget()
     {
-        Turret[] turrets = FindObjectsByType<Turret>(FindObjectsSortMode.None);
-        Transform closestTarget = playerCore;
-        float closestDistance = Vector3.Distance(transform.position, playerCore.position);
+        Turret[] turrets = FindObjectsOfType<Turret>();
+        float closestDistance = float.MaxValue;
+        Turret closestTurret = null;
 
         foreach (Turret turret in turrets)
         {
+            if (turret == null || turret.health <= 0) continue; // Ignore destroyed turrets
+
             float distance = Vector3.Distance(transform.position, turret.transform.position);
-            if (distance < closestDistance && turret.health > 0)
+            if (distance < closestDistance)
             {
                 closestDistance = distance;
-                closestTarget = turret.transform;
+                closestTurret = turret;
             }
         }
 
-        if (closestTarget == playerCore)
+        if (closestTurret != null)
         {
-            currentTarget = null;
+            currentTarget = closestTurret;
+            agent.SetDestination(currentTarget.transform.position); // Move to the closest turret
         }
         else
         {
-            currentTarget = closestTarget.GetComponent<Turret>();
+            currentTarget = null;
+            agent.SetDestination(playerCore.position); // No turrets left, move to core
         }
-
-        agent.SetDestination(closestTarget.position);
     }
 
     void Attack(GameObject target)
@@ -99,6 +105,7 @@ public class EnemyMovement : MonoBehaviour
             }
             else if (target.GetComponent<Turret>() != null)
             {
+                Debug.Log("Attacking turret: " + target.name);
                 target.GetComponent<Turret>().TakeDamage(damage);
             }
             nextAttackTime = Time.time + attackRate;
