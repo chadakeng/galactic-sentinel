@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3779478006901152534}
   - component: {fileID: 2214110982525974324}
   - component: {fileID: 118667519466855027}
-  - component: {fileID: 4474077682505852115}
   - component: {fileID: 2045779342257412104}
   - component: {fileID: 7342769912371488839}
   - component: {fileID: 6863928063161804095}
@@ -114,24 +113,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4474077682505852115
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3164983707812310583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  outlineMode: 0
-  outlineColor: {r: 0.8490566, g: 0.028034903, b: 0.028034903, a: 1}
-  outlineWidth: 6
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
 --- !u!195 &2045779342257412104
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -184,3 +165,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 100
   goldReward: 20
+  hitFlashDuration: 0.1
+  damageTextPrefab: {fileID: 0}

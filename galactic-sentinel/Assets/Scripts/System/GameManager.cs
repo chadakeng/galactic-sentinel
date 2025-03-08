@@ -4,7 +4,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance; // Singleton pattern
 
-    public int gold = 100; // Starting gold
+    public int gold = 10000; // Starting gold
 
     void Awake()
     {

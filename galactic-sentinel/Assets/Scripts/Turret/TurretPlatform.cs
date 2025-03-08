@@ -10,6 +10,7 @@ public class TurretPlatform : MonoBehaviour
         if (!isActive) return;
 
         GameObject newTurret = Instantiate(turretPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+        Debug.Log("Turret spawned in TurretPlatform");
         isActive = false;
     }
 }

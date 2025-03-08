@@ -3,7 +3,7 @@ using TMPro;
 
 public class GoldDisplay : MonoBehaviour
 {
-    public TextMeshProUGUI goldText; // Drag GoldText here
+    public TextMeshProUGUI goldText;
 
     void Update()
     {

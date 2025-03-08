@@ -48,7 +48,7 @@ public class PlayerShooting : MonoBehaviour
 
     void TrySpawnTurret()
     {
-        if (!GameManager.Instance.SpendGold(turretCost)) return; // Not enough gold
+        if (GameManager.Instance.gold <= turretCost) return; // Not enough gold
 
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
@@ -58,6 +58,7 @@ public class PlayerShooting : MonoBehaviour
             TurretPlatform platform = hit.collider.GetComponent<TurretPlatform>();
             if (platform != null && platform.isActive)
             {
+                Debug.Log("Turret placed in playershooting");
                 platform.SpawnTurret();
             }
             else
