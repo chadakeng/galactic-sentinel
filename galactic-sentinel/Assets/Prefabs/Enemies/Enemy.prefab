@@ -166,4 +166,4 @@ MonoBehaviour:
   health: 100
   goldReward: 20
   hitFlashDuration: 0.1
-  damageTextPrefab: {fileID: 0}
+  damageTextPrefab: {fileID: 5423988244189410943, guid: fb7019d66ae454344b762cc39fd5c518, type: 3}

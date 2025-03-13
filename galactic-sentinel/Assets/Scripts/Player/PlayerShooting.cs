@@ -7,6 +7,8 @@ public class PlayerShooting : MonoBehaviour
     public float damage = 20f;
     public LayerMask enemyLayer;
     public LayerMask turretPlatformLayer;
+    public AudioSource gunSound; // Assign in Inspector
+
         
     public float fireRate = 0.2f; // Delay between shots
     private float nextTimeToShoot = 0f; // Tracks when player can shoot next
@@ -31,7 +33,7 @@ public class PlayerShooting : MonoBehaviour
         }
     }
 
-    void Shoot()
+void Shoot()
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
@@ -44,6 +46,9 @@ public class PlayerShooting : MonoBehaviour
                 enemy.TakeDamage(damage);
             }
         }
+
+        // Play gun sound for player
+        if (gunSound != null) gunSound.Play();
     }
 
     void TrySpawnTurret()

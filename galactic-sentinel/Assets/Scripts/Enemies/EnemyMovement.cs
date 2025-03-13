@@ -67,7 +67,7 @@ public class EnemyMovement : MonoBehaviour
 
     void FindClosestTarget()
     {
-        Turret[] turrets = FindObjectsOfType<Turret>();
+        Turret[] turrets = FindObjectsByType<Turret>(FindObjectsSortMode.None);
         float closestDistance = float.MaxValue;
         Turret closestTurret = null;
 
@@ -95,20 +95,20 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    void Attack(GameObject target)
+void Attack(GameObject target)
+{
+    if (Time.time >= nextAttackTime)
     {
-        if (Time.time >= nextAttackTime)
+        if (target.CompareTag("Player"))
         {
-            if (target.CompareTag("Player"))
-            {
-                Debug.Log("Attacking Player!");
-            }
-            else if (target.GetComponent<Turret>() != null)
-            {
-                Debug.Log("Attacking turret: " + target.name);
-                target.GetComponent<Turret>().TakeDamage(damage);
-            }
-            nextAttackTime = Time.time + attackRate;
+            Debug.Log("Attacking Player!");
         }
+        else if (target.GetComponent<TurretHealth>() != null)
+        {
+            Debug.Log("Attacking turret: " + target.name);
+            target.GetComponent<TurretHealth>().TakeDamage(damage);
+        }
+        nextAttackTime = Time.time + attackRate;
     }
+}
 }
