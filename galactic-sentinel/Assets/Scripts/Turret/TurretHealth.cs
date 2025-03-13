@@ -1,31 +1,54 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TurretHealth : MonoBehaviour
 {
     public float maxHealth = 100f;
     private float currentHealth;
-    public ParticleSystem destroyEffect; // Assign in Inspector
-    private TurretPlatform platform; // The platform this turret belongs to
-    public GameObject damageTextPrefab; // Assign the floating text prefab in Inspector
-void Start()
-{
-    currentHealth = maxHealth;
-    
-    // Find the turret platform below this turret
-    if (platform == null)
+    public ParticleSystem destroyEffect;
+    private TurretPlatform platform;
+
+    public GameObject healthBarPrefab;
+    private GameObject healthBarInstance;
+    private Image healthBarFill;
+
+    void Start()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 2f))
+        currentHealth = maxHealth;
+
+        if (healthBarPrefab != null)
         {
-            platform = hit.collider.GetComponent<TurretPlatform>();
+            healthBarInstance = Instantiate(healthBarPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
+
+            healthBarInstance.transform.localScale = Vector3.one * 0.5f; // Adjust size here
+
+            healthBarFill = healthBarInstance.transform.Find("HealthBarBackground/HealthBarFill").GetComponent<Image>();
+
+            if (healthBarFill == null)
+            {
+                Debug.LogError("❌ HealthBarFill Image not found inside prefab!");
+            }
         }
     }
-}
+
+    void Update()
+    {
+        if (healthBarInstance != null)
+        {
+            // Move health bar above the turret
+            healthBarInstance.transform.position = transform.position + Vector3.up * 3.5f; // Adjust this value
+
+            // Ensure health bar faces the player
+            healthBarInstance.transform.LookAt(Camera.main.transform);
+            healthBarInstance.transform.Rotate(0, 180, 0);
+        }
+    }
 
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        SpawnFloatingText(amount, false); // False = damage (red text)
+        currentHealth = Mathf.Max(0, currentHealth); // Prevent health from going negative
+        UpdateHealthBar();
 
         if (currentHealth <= 0)
         {
@@ -35,18 +58,21 @@ void Start()
 
     public void Heal(float amount)
     {
+        if (currentHealth >= maxHealth) return;
+
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-        SpawnFloatingText(amount, true); // True = healing (green text)
+        UpdateHealthBar();
     }
 
-    void SpawnFloatingText(float amount, bool isHealing)
+
+void UpdateHealthBar()
+{
+    if (healthBarFill != null)
     {
-        if (damageTextPrefab == null) return; // Prevent errors
-
-        GameObject damageTextObj = Instantiate(damageTextPrefab, transform.position + Vector3.up * 2, Quaternion.identity);
-        FloatingDamage floatingText = damageTextObj.GetComponent<FloatingDamage>();
-        floatingText.SetDamage(amount, transform, isHealing);
+        healthBarFill.fillAmount = currentHealth / maxHealth;
+        Debug.Log($"🔴 Health Updated! Current Health: {currentHealth}, Fill Amount: {healthBarFill.fillAmount}");
     }
+}
 
     void Die()
     {
@@ -55,12 +81,12 @@ void Start()
             Instantiate(destroyEffect, transform.position, Quaternion.identity);
         }
 
-        // Reactivate platform so player can build again
         if (platform != null)
         {
             platform.isActive = true;
         }
 
+        Destroy(healthBarInstance);
         Destroy(gameObject);
     }
 }

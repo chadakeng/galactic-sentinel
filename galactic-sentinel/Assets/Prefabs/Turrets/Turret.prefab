@@ -5094,4 +5094,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 100
   destroyEffect: {fileID: 887615725354791094, guid: abc47871aebc94cc8b995d71011ae112, type: 3}
-  damageTextPrefab: {fileID: 5423988244189410943, guid: fb7019d66ae454344b762cc39fd5c518, type: 3}
+  healthBarPrefab: {fileID: 7476926433240226033, guid: 3862a39a64161459097857dab7afd8a9, type: 3}

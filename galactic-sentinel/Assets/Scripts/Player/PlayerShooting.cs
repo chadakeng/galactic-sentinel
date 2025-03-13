@@ -16,22 +16,27 @@ public class PlayerShooting : MonoBehaviour
 
     public int turretCost = 50;
 
-    void Update()
+void Update()
+{
+    if (Input.GetMouseButton(0)) // Left Click to Shoot
     {
-        if (Input.GetMouseButton(0)) // Hold Left Click to continuously shoot
+        if (Time.time >= nextTimeToShoot)
         {
-            if (Time.time >= nextTimeToShoot)
-            {
-                nextTimeToShoot = Time.time + fireRate;
-                Shoot();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.F)) // Press 'F' to buy and place a turret
-        {
-            TrySpawnTurret();
+            nextTimeToShoot = Time.time + fireRate;
+            Shoot();
         }
     }
+
+    if (Input.GetMouseButton(1)) // Right Click to Heal Turret
+    {
+        TryRepairTurret();
+    }
+
+    if (Input.GetKeyDown(KeyCode.F)) // Press 'F' to buy and place a turret
+    {
+        TrySpawnTurret();
+    }
+}
 
 void Shoot()
     {
@@ -72,4 +77,20 @@ void Shoot()
             }
         }
     }
+    void TryRepairTurret()
+{
+    Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+    RaycastHit hit;
+
+    if (Physics.Raycast(ray, out hit, shootRange)) // ✅ Detect turret within range
+    {
+        TurretHealth turret = hit.collider.GetComponent<TurretHealth>();
+
+        if (turret != null)
+        {
+            turret.Heal(20f); // ✅ Restore 20 HP per right-click
+            Debug.Log("Healing turret: " + turret.name);
+        }
+    }
+}
 }
