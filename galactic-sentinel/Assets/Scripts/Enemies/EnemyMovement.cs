@@ -105,7 +105,6 @@ void Attack(GameObject target)
         }
         else if (target.GetComponent<TurretHealth>() != null)
         {
-            Debug.Log("Attacking turret: " + target.name);
             target.GetComponent<TurretHealth>().TakeDamage(damage);
         }
         nextAttackTime = Time.time + attackRate;

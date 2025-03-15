@@ -4983,6 +4983,11 @@ MonoBehaviour:
   fireRate: 0.2
   damagePerShot: 5
   muzzleFlash: {fileID: 3539065599951956017}
+  turretBaseCost: 50
+  upgradeCost: 20
+  upgradeLevel: 0
+  maxUpgradeLevel: 5
+  scrapPrefab: {fileID: 0}
 --- !u!82 &3719682257442323640
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5095,3 +5100,4 @@ MonoBehaviour:
   maxHealth: 100
   destroyEffect: {fileID: 887615725354791094, guid: abc47871aebc94cc8b995d71011ae112, type: 3}
   healthBarPrefab: {fileID: 7476926433240226033, guid: 3862a39a64161459097857dab7afd8a9, type: 3}
+  scrapPrefab: {fileID: 2558139056817940533, guid: 5184354d2b70940d4b4b03f87586e81e, type: 3}

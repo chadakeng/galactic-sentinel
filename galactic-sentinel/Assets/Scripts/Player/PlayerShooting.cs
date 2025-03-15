@@ -2,47 +2,95 @@ using UnityEngine;
 
 public class PlayerShooting : MonoBehaviour
 {
-    public Camera playerCamera; 
+    public Camera playerCamera;
     public float shootRange = 50f;
     public float damage = 20f;
     public LayerMask enemyLayer;
     public LayerMask turretPlatformLayer;
-    public AudioSource gunSound; // Assign in Inspector
+    public AudioSource gunSound;
 
-        
-    public float fireRate = 0.2f; // Delay between shots
-    private float nextTimeToShoot = 0f; // Tracks when player can shoot next
-
+    public float fireRate = 0.2f;
+    private float nextTimeToShoot = 0f;
 
     public int turretCost = 50;
-
+    private RaycastHit hit;  // Store raycast hit result
+    private bool isLookingAtTurret = false;
+    private bool isLookingAtScrap = false;
+    private bool isLookingAtPlatform = false;
 void Update()
 {
-    if (Input.GetMouseButton(0)) // Left Click to Shoot
+    PerformRaycast();
+
+    if (Input.GetMouseButton(0) && Time.time >= nextTimeToShoot) 
     {
-        if (Time.time >= nextTimeToShoot)
-        {
-            nextTimeToShoot = Time.time + fireRate;
-            Shoot();
-        }
+        nextTimeToShoot = Time.time + fireRate;
+        Shoot();
     }
 
-    if (Input.GetMouseButton(1)) // Right Click to Heal Turret
+    if (Input.GetMouseButton(1)) 
     {
         TryRepairTurret();
     }
 
-    if (Input.GetKeyDown(KeyCode.F)) // Press 'F' to buy and place a turret
+    if (isLookingAtTurret) 
+    {
+        Turret turret = hit.collider.GetComponent<Turret>();
+
+        if (Input.GetKeyDown(KeyCode.F)) // Start upgrading
+        {
+            turret.StartUpgrade();
+        }
+        else if (Input.GetKeyUp(KeyCode.F)) // Cancel upgrade
+        {
+            turret.CancelUpgrade();
+        }
+    }
+
+    if (isLookingAtScrap) 
+    {
+        if (Input.GetKey(KeyCode.F)) 
+        {
+            hit.collider.GetComponent<TurretScrap>().RepairScrap();
+        }
+        else if (Input.GetKeyDown(KeyCode.G)) 
+        {
+            ReplaceScrapWithNewTurret();
+        }
+    }
+
+    if (isLookingAtPlatform && Input.GetKeyDown(KeyCode.F)) 
     {
         TrySpawnTurret();
     }
 }
 
-void Shoot()
+    void PerformRaycast()
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        RaycastHit hit;
+        isLookingAtTurret = false;
+        isLookingAtScrap = false;
+        isLookingAtPlatform = false;
 
+        if (Physics.Raycast(ray, out hit, shootRange))
+        {
+            if (hit.collider.GetComponent<Turret>() != null) 
+            {
+                isLookingAtTurret = true;
+            }
+            else if (hit.collider.GetComponent<TurretScrap>() != null) 
+            {
+                isLookingAtScrap = true;
+            }
+            else if (hit.collider.GetComponent<TurretPlatform>()?.isActive == true) 
+            {
+                isLookingAtPlatform = true;
+            }
+        }
+    }
+
+    void Shoot()
+    {
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         if (Physics.Raycast(ray, out hit, shootRange, enemyLayer))
         {
             EnemyHealth enemy = hit.collider.GetComponent<EnemyHealth>();
@@ -51,46 +99,38 @@ void Shoot()
                 enemy.TakeDamage(damage);
             }
         }
-
-        // Play gun sound for player
         if (gunSound != null) gunSound.Play();
     }
 
     void TrySpawnTurret()
     {
-        if (GameManager.Instance.gold <= turretCost) return; // Not enough gold
+        if (GameManager.Instance.gold < turretCost) return;
 
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, shootRange, turretPlatformLayer))
+        if (hit.collider.GetComponent<TurretPlatform>() != null) 
         {
-            TurretPlatform platform = hit.collider.GetComponent<TurretPlatform>();
-            if (platform != null && platform.isActive)
-            {
-                Debug.Log("Turret placed in playershooting");
-                platform.SpawnTurret();
-            }
-            else
-            {
-                Debug.Log("Turret already placed here!");
-            }
+            hit.collider.GetComponent<TurretPlatform>().SpawnTurret();
+            GameManager.Instance.gold -= turretCost;
         }
     }
+
     void TryRepairTurret()
-{
-    Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-    RaycastHit hit;
-
-    if (Physics.Raycast(ray, out hit, shootRange)) // ✅ Detect turret within range
     {
-        TurretHealth turret = hit.collider.GetComponent<TurretHealth>();
-
-        if (turret != null)
+        if (hit.collider.GetComponent<TurretHealth>() != null) 
         {
-            turret.Heal(20f); // ✅ Restore 20 HP per right-click
-            Debug.Log("Healing turret: " + turret.name);
+            hit.collider.GetComponent<TurretHealth>().Heal(20f);
         }
     }
-}
+
+    void ReplaceScrapWithNewTurret()
+    {
+        if (GameManager.Instance.gold < turretCost) return;
+
+        TurretScrap scrap = hit.collider.GetComponent<TurretScrap>();
+        if (scrap != null)
+        {
+            GameManager.Instance.SpendGold(turretCost);
+            Instantiate(GameManager.Instance.turretPrefab, scrap.transform.position, Quaternion.identity);
+            Destroy(scrap.gameObject);
+        }
+    }
 }

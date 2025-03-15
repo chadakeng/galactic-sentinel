@@ -6,28 +6,27 @@ public class TurretHealth : MonoBehaviour
     public float maxHealth = 100f;
     private float currentHealth;
     public ParticleSystem destroyEffect;
-    private TurretPlatform platform;
-
+    
     public GameObject healthBarPrefab;
     private GameObject healthBarInstance;
     private Image healthBarFill;
 
+    public GameObject scrapPrefab; // Assign TurretScrap prefab in Inspector
+    private Turret turretComponent; // Reference to get upgrade level
+
     void Start()
     {
         currentHealth = maxHealth;
+        turretComponent = GetComponent<Turret>();
+        InitializeHealthUI();
+    }
 
+    public void InitializeHealthUI()
+    {
         if (healthBarPrefab != null)
         {
-            healthBarInstance = Instantiate(healthBarPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-
-            healthBarInstance.transform.localScale = Vector3.one * 0.5f; // Adjust size here
-
+            healthBarInstance = Instantiate(healthBarPrefab, transform.position + Vector3.up * 3f, Quaternion.identity);
             healthBarFill = healthBarInstance.transform.Find("HealthBarBackground/HealthBarFill").GetComponent<Image>();
-
-            if (healthBarFill == null)
-            {
-                Debug.LogError("❌ HealthBarFill Image not found inside prefab!");
-            }
         }
     }
 
@@ -35,10 +34,7 @@ public class TurretHealth : MonoBehaviour
     {
         if (healthBarInstance != null)
         {
-            // Move health bar above the turret
-            healthBarInstance.transform.position = transform.position + Vector3.up * 3.5f; // Adjust this value
-
-            // Ensure health bar faces the player
+            healthBarInstance.transform.position = transform.position + Vector3.up * 3.5f;
             healthBarInstance.transform.LookAt(Camera.main.transform);
             healthBarInstance.transform.Rotate(0, 180, 0);
         }
@@ -47,7 +43,7 @@ public class TurretHealth : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        currentHealth = Mathf.Max(0, currentHealth); // Prevent health from going negative
+        currentHealth = Mathf.Max(0, currentHealth);
         UpdateHealthBar();
 
         if (currentHealth <= 0)
@@ -64,15 +60,13 @@ public class TurretHealth : MonoBehaviour
         UpdateHealthBar();
     }
 
-
-void UpdateHealthBar()
-{
-    if (healthBarFill != null)
+    void UpdateHealthBar()
     {
-        healthBarFill.fillAmount = currentHealth / maxHealth;
-        Debug.Log($"🔴 Health Updated! Current Health: {currentHealth}, Fill Amount: {healthBarFill.fillAmount}");
+        if (healthBarFill != null)
+        {
+            healthBarFill.fillAmount = currentHealth / maxHealth;
+        }
     }
-}
 
     void Die()
     {
@@ -81,12 +75,22 @@ void UpdateHealthBar()
             Instantiate(destroyEffect, transform.position, Quaternion.identity);
         }
 
-        if (platform != null)
-        {
-            platform.isActive = true;
-        }
-
+        SpawnScrap();
         Destroy(healthBarInstance);
         Destroy(gameObject);
+    }
+
+    void SpawnScrap()
+    {
+        if (scrapPrefab == null) return;
+
+        GameObject scrap = Instantiate(scrapPrefab, transform.position, Quaternion.identity);
+        TurretScrap scrapData = scrap.GetComponent<TurretScrap>();
+
+        if (scrapData != null && turretComponent != null)
+        {
+            scrapData.repairCost = turretComponent.turretBaseCost + (turretComponent.upgradeCost * turretComponent.upgradeLevel);
+            scrapData.previousUpgradeCost = turretComponent.upgradeCost * turretComponent.upgradeLevel;
+        }
     }
 }

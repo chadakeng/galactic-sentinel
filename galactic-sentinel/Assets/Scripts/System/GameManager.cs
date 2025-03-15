@@ -5,6 +5,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance; // Singleton pattern
 
     public int gold = 10000; // Starting gold
+    public GameObject turretPrefab;
 
     void Awake()
     {
