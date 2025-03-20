@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
+
 
 public class EnemyMovement : MonoBehaviour
 {
@@ -110,4 +112,15 @@ void Attack(GameObject target)
         nextAttackTime = Time.time + attackRate;
     }
 }
+    // is this for Firewall to stop enemy from moving 
+    public void StopMovement(float duration)
+    {
+        StartCoroutine(StopMovementCoroutine(duration));
+    }
+    private IEnumerator StopMovementCoroutine(float duration)
+    {
+        agent.isStopped = true;       // Freeze movement
+        yield return new WaitForSeconds(duration);
+        agent.isStopped = false;      // Resume movement
+    }
 }
