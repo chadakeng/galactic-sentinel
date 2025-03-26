@@ -817,6 +817,7 @@ MonoBehaviour:
   nukePrefab: {fileID: 4111180128255427351, guid: 8516e288459734443a33d94078cba145, type: 3}
   nukeDropDelay: 2
   spawnHeight: 5
+  forwardDistance: 5
 --- !u!114 &1774869563
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -846,7 +847,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nukePrefab: {fileID: 4111180128255427351, guid: 8516e288459734443a33d94078cba145, type: 3}
+  nukeDropDelay: 0.5
   spawnHeight: 5
+  forwardDistance: 5
 --- !u!1001 &95539300944971668
 PrefabInstance:
   m_ObjectHideFlags: 0
