@@ -121,7 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c5d6a55eaa4048ed98627330f83d2e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 3164983707812310583, guid: 1032141038dd940688f5b7ef584dbb2b, type: 3}
-  spawnRadius: 5
-  spawnRate: 1
-  maxEnemiesPerWave: 3
+  enemyPrefab: {fileID: 7650920708464975443, guid: 836150e4480d54d10afc1e9b5fdc5c2d, type: 3}
+  spawnRadius: 20
+  spawnRate: 10
+  maxEnemiesPerWave: 2

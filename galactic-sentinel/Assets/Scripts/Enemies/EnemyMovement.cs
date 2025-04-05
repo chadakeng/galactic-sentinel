@@ -6,42 +6,29 @@ public class EnemyMovement : MonoBehaviour
     public enum EnemyType { Fast, Regular }
     public EnemyType enemyType;
 
-    public float attackRange = 2f; // Distance to attack
-    public float attackRate = 1f; // Time between attacks
-    public int damage = 10; // Damage per attack
+    public float attackRange = 2f;
+    public float attackRate = 1f;
+    public int damage = 10;
 
     private NavMeshAgent agent;
-    private Transform playerCore; // The Player (Core)
-    private Turret currentTarget;
+    private GameObject currentTarget;
     private float nextAttackTime = 0f;
+    private Animator animator;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
 
-        if (agent == null)
-        {
-            Debug.LogError(gameObject.name + " is missing a NavMeshAgent!");
-        }
-
-        playerCore = GameObject.FindGameObjectWithTag("Player")?.transform;
-
-        if (playerCore == null)
-        {
-            Debug.LogError("Player (Core) not found! Make sure the Player has the 'Player' tag.");
-        }
-
-        if (enemyType == EnemyType.Fast)
-        {
-            agent.SetDestination(playerCore.position); // Fast enemies go directly to core
-        }
+        if (agent == null) Debug.LogError($"{gameObject.name} is missing a NavMeshAgent!");
+        if (animator == null) Debug.LogError($"{gameObject.name} is missing an Animator!");
     }
 
     void Update()
     {
         if (enemyType == EnemyType.Regular)
         {
-            FindClosestTarget(); // Always check for the closest target
+            FindClosestTarget();
 
             if (currentTarget != null)
             {
@@ -49,65 +36,70 @@ public class EnemyMovement : MonoBehaviour
 
                 if (distance <= attackRange)
                 {
-                    Attack(currentTarget.gameObject);
-                    agent.isStopped = true;  // Stop moving when attacking
+                    if (!agent.isStopped)
+                    {
+                        agent.isStopped = true;
+                        agent.ResetPath();
+                    }
+
+                    Attack(currentTarget);
                 }
                 else
                 {
+                    if (agent.isStopped) agent.isStopped = false;
+
                     agent.SetDestination(currentTarget.transform.position);
-                    agent.isStopped = false;
                 }
-            }
-            else
-            {
-                agent.SetDestination(playerCore.position);
+
+                animator.SetFloat("Speed", agent.velocity.magnitude);
             }
         }
     }
 
     void FindClosestTarget()
     {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
         Turret[] turrets = FindObjectsByType<Turret>(FindObjectsSortMode.None);
-        float closestDistance = float.MaxValue;
-        Turret closestTurret = null;
-
-        foreach (Turret turret in turrets)
+        // if turret still present target turret else target player
+        if (turrets.Length > 0)
         {
-            if (turret == null || turret.health <= 0) continue; // Ignore destroyed turrets
-
-            float distance = Vector3.Distance(transform.position, turret.transform.position);
-            if (distance < closestDistance)
+            currentTarget = turrets[0].gameObject;
+            float closestDistance = Vector3.Distance(transform.position, currentTarget.transform.position);
+            foreach (Turret turret in turrets)
             {
-                closestDistance = distance;
-                closestTurret = turret;
+                float distance = Vector3.Distance(transform.position, turret.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    currentTarget = turret.gameObject;
+                }
             }
-        }
-
-        if (closestTurret != null)
-        {
-            currentTarget = closestTurret;
-            agent.SetDestination(currentTarget.transform.position); // Move to the closest turret
+            agent.SetDestination(currentTarget.transform.position);
         }
         else
         {
-            currentTarget = null;
-            agent.SetDestination(playerCore.position); // No turrets left, move to core
+            currentTarget = player;
+            if (player != null)
+            {
+                agent.SetDestination(player.transform.position);
+            }
         }
     }
 
-void Attack(GameObject target)
-{
-    if (Time.time >= nextAttackTime)
+    void Attack(GameObject target)
     {
-        if (target.CompareTag("Player"))
+        if (Time.time >= nextAttackTime)
         {
-            Debug.Log("Attacking Player!");
+            if (target.CompareTag("Player"))
+            {
+                target.GetComponent<PlayerHealth>()?.TakeDamage(damage);
+            }
+            else if (target.GetComponent<TurretHealth>() != null)
+            {
+                target.GetComponent<TurretHealth>().TakeDamage(damage);
+            }
+
+            nextAttackTime = Time.time + attackRate;
         }
-        else if (target.GetComponent<TurretHealth>() != null)
-        {
-            target.GetComponent<TurretHealth>().TakeDamage(damage);
-        }
-        nextAttackTime = Time.time + attackRate;
     }
-}
 }

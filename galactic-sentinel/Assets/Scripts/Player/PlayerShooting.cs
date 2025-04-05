@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class PlayerShooting : MonoBehaviour
 {
@@ -13,56 +14,68 @@ public class PlayerShooting : MonoBehaviour
     private float nextTimeToShoot = 0f;
 
     public int turretCost = 50;
-    private RaycastHit hit;  // Store raycast hit result
+    public GameObject upgradePromptUI; // <-- Add this for UI
+    private RaycastHit hit;
     private bool isLookingAtTurret = false;
     private bool isLookingAtScrap = false;
     private bool isLookingAtPlatform = false;
-void Update()
+
+    void Update()
+    {
+        PerformRaycast();
+
+        // Show [F] Upgrade when looking at turret
+        upgradePromptUI.SetActive(isLookingAtTurret);
+
+        if (Input.GetMouseButton(0) && Time.time >= nextTimeToShoot) 
+        {
+            nextTimeToShoot = Time.time + fireRate;
+            Shoot();
+        }
+
+        if (Input.GetMouseButton(1)) 
+        {
+            TryRepairTurret();
+        }
+
+        if (isLookingAtTurret) 
+        {
+            Turret turret = hit.collider.GetComponent<Turret>();
+
+            if (Input.GetKeyDown(KeyCode.F)) 
+            {
+                turret.StartUpgrade();
+            }
+            else if (Input.GetKeyUp(KeyCode.F)) 
+            {
+                turret.CancelUpgrade();
+            }
+        }
+
+if (isLookingAtScrap)
 {
-    PerformRaycast();
-
-    if (Input.GetMouseButton(0) && Time.time >= nextTimeToShoot) 
+    TurretScrap scrap = hit.collider.GetComponent<TurretScrap>();
+    if (Input.GetKey(KeyCode.F))
     {
-        nextTimeToShoot = Time.time + fireRate;
-        Shoot();
+        scrap?.StartRepair();
+    }
+    else
+    {
+        scrap?.CancelRepair();
     }
 
-    if (Input.GetMouseButton(1)) 
+    if (Input.GetKeyDown(KeyCode.R))
     {
-        TryRepairTurret();
-    }
-
-    if (isLookingAtTurret) 
-    {
-        Turret turret = hit.collider.GetComponent<Turret>();
-
-        if (Input.GetKeyDown(KeyCode.F)) // Start upgrading
-        {
-            turret.StartUpgrade();
-        }
-        else if (Input.GetKeyUp(KeyCode.F)) // Cancel upgrade
-        {
-            turret.CancelUpgrade();
-        }
-    }
-
-    if (isLookingAtScrap) 
-    {
-        if (Input.GetKey(KeyCode.F)) 
-        {
-            hit.collider.GetComponent<TurretScrap>().RepairScrap();
-        }
-        else if (Input.GetKeyDown(KeyCode.G)) 
-        {
-            ReplaceScrapWithNewTurret();
-        }
-    }
-
-    if (isLookingAtPlatform && Input.GetKeyDown(KeyCode.F)) 
-    {
-        TrySpawnTurret();
+        Debug.Log("Replacing scrap with new turret");
+        ReplaceScrapWithNewTurret();
     }
 }
+
+        if (isLookingAtPlatform && Input.GetKeyDown(KeyCode.F)) 
+        {
+            TrySpawnTurret();
+        }
+    }
 
     void PerformRaycast()
     {
@@ -128,9 +141,10 @@ void Update()
         TurretScrap scrap = hit.collider.GetComponent<TurretScrap>();
         if (scrap != null)
         {
-            GameManager.Instance.SpendGold(turretCost);
-            Instantiate(GameManager.Instance.turretPrefab, scrap.transform.position, Quaternion.identity);
-            Destroy(scrap.gameObject);
+    GameManager.Instance.SpendGold(turretCost);
+    Vector3 spawnPosition = scrap.transform.position + Vector3.up * 0.5f;
+        Destroy(scrap.gameObject);
+    Instantiate(GameManager.Instance.turretPrefab, spawnPosition, Quaternion.identity);
         }
     }
 }

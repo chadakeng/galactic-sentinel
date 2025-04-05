@@ -80,17 +80,19 @@ public class TurretHealth : MonoBehaviour
         Destroy(gameObject);
     }
 
-    void SpawnScrap()
+void SpawnScrap()
+{
+    if (scrapPrefab == null) return;
+
+    GameObject scrap = Instantiate(scrapPrefab, transform.position, Quaternion.identity);
+    TurretScrap scrapData = scrap.GetComponent<TurretScrap>();
+
+    if (scrapData != null)
     {
-        if (scrapPrefab == null) return;
-
-        GameObject scrap = Instantiate(scrapPrefab, transform.position, Quaternion.identity);
-        TurretScrap scrapData = scrap.GetComponent<TurretScrap>();
-
-        if (scrapData != null && turretComponent != null)
-        {
-            scrapData.repairCost = turretComponent.turretBaseCost + (turretComponent.upgradeCost * turretComponent.upgradeLevel);
-            scrapData.previousUpgradeCost = turretComponent.upgradeCost * turretComponent.upgradeLevel;
-        }
+scrapData.upgradeLevel = turretComponent.upgradeLevel;
+scrapData.turretBaseCost = turretComponent.turretBaseCost;
+scrapData.upgradeCost = turretComponent.upgradeCost;
+scrapData.turretPrefab = GameManager.Instance.turretPrefab;
     }
+}
 }
