@@ -89,8 +89,10 @@ void SpawnFloatingText(float amount)
     floatingText.SetDamage(amount, transform, false);
 }
 
-    void Die()
-    {
-        Destroy(gameObject);
-    }
+void Die()
+{
+    GameManager.Instance.AddGold(goldReward);
+    GameManager.Instance.OnEnemyKilled();
+    Destroy(gameObject);
+}
 }

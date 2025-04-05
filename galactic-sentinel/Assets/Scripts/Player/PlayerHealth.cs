@@ -1,23 +1,33 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class PlayerHealth : MonoBehaviour
 {
     public float maxHealth = 200f;
     private float currentHealth;
 
-    public GameObject gameOverUI; // Optional: drag your Game Over UI here
-    public Image healthBarFill;   // Drag "HealthbarFill" here in the Inspector
+    public GameObject gameOverUI;
+    public Image healthBarFill;
+    public TextMeshProUGUI healthText;
+void Start()
+{
+    currentHealth = maxHealth;
 
-    void Start()
+    if (healthBarFill != null)
     {
-        currentHealth = maxHealth;
-
-        if (healthBarFill != null)
-        {
-            healthBarFill.fillAmount = 1f;
-        }
+        healthBarFill.fillAmount = 1f;
     }
+
+    UpdateHealthText();
+}
+void UpdateHealthText()
+{
+    if (healthText != null)
+    {
+        healthText.text = $"{Mathf.CeilToInt(currentHealth)} / {Mathf.CeilToInt(maxHealth)}";
+    }
+}
 
     public void TakeDamage(float amount)
     {
@@ -34,6 +44,7 @@ public class PlayerHealth : MonoBehaviour
         {
             Die();
         }
+        UpdateHealthText();
     }
 
     void Die()
@@ -44,4 +55,12 @@ public class PlayerHealth : MonoBehaviour
 
         gameObject.SetActive(false); // Disable the player
     }
+    public void IncreaseMaxHealth(float amount)
+    {
+        maxHealth += amount;
+        currentHealth += amount;
+        Debug.Log($"Player max health increased to {maxHealth}");
+        UpdateHealthText();
+    }
+    
 }

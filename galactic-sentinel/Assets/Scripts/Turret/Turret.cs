@@ -14,7 +14,7 @@ public class Turret : MonoBehaviour
     public int turretBaseCost = 50;
     public int upgradeCost = 20;
     public int upgradeLevel = 0;
-    public int maxUpgradeLevel = 5;
+    public int maxUpgradeLevel = 100;
 
     public GameObject upgradeBarPrefab;
     private GameObject upgradeBarInstance;
@@ -137,8 +137,13 @@ public class Turret : MonoBehaviour
         {
             GameManager.Instance.gold -= currentUpgradeCost; ;
             upgradeLevel++;
-            fireRate *= 1.05f; // 5% increase in fire rate per upgrade
-            damagePerShot = 5f * Mathf.Pow(1.1f, upgradeLevel); // 10% increase in damage per upgrade
+            damagePerShot = 5f * Mathf.Pow(1.05f, upgradeLevel); // 5% increase in damage per upgrade
+            TurretHealth turretHealth = GetComponent<TurretHealth>();
+            if (turretHealth != null)
+            {
+                turretHealth.maxHealth += 100f; // Increase max health by 10 per upgrade
+                turretHealth.Heal(turretHealth.maxHealth*0.5f); // Heal the turret by 50% of max health
+            }
             Debug.Log($"Turret upgraded to Level {upgradeLevel}!");
         }
         else

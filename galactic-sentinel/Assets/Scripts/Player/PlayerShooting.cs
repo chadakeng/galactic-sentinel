@@ -109,7 +109,8 @@ if (isLookingAtScrap)
             EnemyHealth enemy = hit.collider.GetComponent<EnemyHealth>();
             if (enemy != null)
             {
-                enemy.TakeDamage(damage);
+                int totalDamage = (int)damage + GameManager.Instance.GetPlayerBonusDamage();
+                enemy.TakeDamage(totalDamage);
             }
         }
         if (gunSound != null) gunSound.Play();
@@ -130,8 +131,8 @@ if (isLookingAtScrap)
     {
         if (hit.collider.GetComponent<TurretHealth>() != null) 
         {
-            hit.collider.GetComponent<TurretHealth>().Heal(20f);
-        }
+float healing = 20f + GameManager.Instance.GetTurretHealingBonus();
+hit.collider.GetComponent<TurretHealth>()?.Heal(healing);        }
     }
 
     void ReplaceScrapWithNewTurret()
