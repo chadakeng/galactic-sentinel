@@ -142,4 +142,5 @@ MonoBehaviour:
   upgradeLevel: 0
   turretBaseCost: 0
   upgradeCost: 0
-  repairBarPrefab: {fileID: 817202784013464863, guid: d54477958266e4d4db1e739944380bba, type: 3}
+  repairBarPrefab: {fileID: 2437760419994839270, guid: fd28588e7ec5844738984aab0d5e2d7a, type: 3}
+  repairTime: 3
