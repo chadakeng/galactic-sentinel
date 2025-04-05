@@ -1,4 +1,3 @@
 repository "galactic-sentinel/galactic-sentinel@4453547@cloud"
   path "/"
-    br "/main"
-    co "/main"
+    smartbranch "/main" changeset "24"
