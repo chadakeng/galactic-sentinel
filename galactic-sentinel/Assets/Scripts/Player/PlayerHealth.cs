@@ -62,5 +62,15 @@ void UpdateHealthText()
         Debug.Log($"Player max health increased to {maxHealth}");
         UpdateHealthText();
     }
+    public void Heal(float amount)
+{
+    currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+    Debug.Log($"Player healed: {amount}. Current health: {currentHealth}");
+
+    if (healthBarFill != null)
+        healthBarFill.fillAmount = currentHealth / maxHealth;
+
+    UpdateHealthText();
+}
     
 }

@@ -3,7 +3,10 @@ using System.Collections;
 
 public class EnemyHealth : MonoBehaviour
 {
+    public AudioClip deathClip;
+private AudioSource audioSource;
     public float health = 100f;
+    public int damage = 10;  // Will be set by the spawner
     public int goldReward = 20;
     private Renderer enemyRenderer;
     private Color originalColor;
@@ -14,6 +17,7 @@ public class EnemyHealth : MonoBehaviour
     void Start()
     {
         enemyRenderer = GetComponent<Renderer>();
+         audioSource = GetComponent<AudioSource>();
         if (enemyRenderer != null)
         {
             originalColor = enemyRenderer.material.color;
@@ -93,6 +97,12 @@ void Die()
 {
     GameManager.Instance.AddGold(goldReward);
     GameManager.Instance.OnEnemyKilled();
+
+    if (audioSource != null && deathClip != null)
+    {
+        audioSource.PlayOneShot(deathClip);
+    }
+
     Destroy(gameObject);
 }
 }

@@ -2,39 +2,58 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    public GameObject enemyPrefab;  // Assign enemy prefab in the Inspector
-    public float spawnRadius = 5f;  // How far enemies can spawn from the spawner
-    public float spawnRate = 5f;  // Time between spawn cycles
-    public int maxEnemiesPerWave = 5;  // Max enemies per wave
-    private int currentEnemyCount = 0;  // Tracks total spawned enemies
+    public GameObject enemyPrefab;
+    public float baseSpawnRate = 30f;
+    public float spawnRadius = 5f;
+    public int maxEnemiesPerWave = 5;
+
+    private float spawnTimer = 0f;
+    private float currentSpawnRate;
+    private int baseEnemyHealth = 100;
+    private int baseEnemyDamage = 10;
 
     void Start()
     {
-        InvokeRepeating(nameof(SpawnEnemies), 2f, spawnRate);
+        currentSpawnRate = baseSpawnRate;
     }
 
-    void SpawnEnemies()
+    void Update()
     {
+        spawnTimer += Time.deltaTime;
 
-        // Random number of enemies (between 1 and maxEnemiesPerWave)
+        int difficultyMultiplier = GameManager.Instance.score / 200;
+
+        // Update spawn rate (decreases by 0.2s every 100 score, min 1s)
+        currentSpawnRate = Mathf.Max(1f, baseSpawnRate - difficultyMultiplier * 0.1f);
+
+        if (spawnTimer >= currentSpawnRate)
+        {
+            SpawnEnemies(difficultyMultiplier);
+            spawnTimer = 0f;
+        }
+    }
+
+    void SpawnEnemies(int difficultyMultiplier)
+    {
         int enemiesToSpawn = Random.Range(1, maxEnemiesPerWave + 1);
 
         for (int i = 0; i < enemiesToSpawn; i++)
         {
-            Vector3 randomSpawnPosition = GetRandomSpawnPosition();
-            Instantiate(enemyPrefab, randomSpawnPosition, Quaternion.identity);
+            Vector3 spawnPos = GetRandomSpawnPosition();
+            GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
 
-            currentEnemyCount++;
+            EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+            if (enemyHealth != null)
+            {
+                enemyHealth.health = baseEnemyHealth + (10 * difficultyMultiplier);
+                enemyHealth.damage = baseEnemyDamage + (10 * difficultyMultiplier);
+            }
         }
     }
 
     Vector3 GetRandomSpawnPosition()
     {
-        Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;  // Random point in a circle
-        return new Vector3(
-            transform.position.x + randomCircle.x,  // Use spawner's own position
-            transform.position.y,
-            transform.position.z + randomCircle.y
-        );
+        Vector2 circle = Random.insideUnitCircle * spawnRadius;
+        return new Vector3(transform.position.x + circle.x, transform.position.y, transform.position.z + circle.y);
     }
 }

@@ -10,6 +10,8 @@ public class PlayerShooting : MonoBehaviour
     public LayerMask enemyLayer;
     public LayerMask turretPlatformLayer;
     public AudioSource gunSound;
+    public TextMeshProUGUI interactionPromptText;
+    private PlayerHealth playerHealth;
 
     public float fireRate = 0.2f;
     private float nextTimeToShoot = 0f;
@@ -21,6 +23,11 @@ public class PlayerShooting : MonoBehaviour
     private bool isLookingAtScrap = false;
     private bool isLookingAtPlatform = false;
 
+    void Start()
+    {
+            playerHealth = FindObjectOfType<PlayerHealth>();
+
+    }
     void Update()
     {
         PerformRaycast();
@@ -76,31 +83,39 @@ public class PlayerShooting : MonoBehaviour
         {
             TrySpawnTurret();
         }
+        TryHealPlayer();
     }
 
-    void PerformRaycast()
-    {
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-        isLookingAtTurret = false;
-        isLookingAtScrap = false;
-        isLookingAtPlatform = false;
+void PerformRaycast()
+{
+    Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+    isLookingAtTurret = false;
+    isLookingAtScrap = false;
+    isLookingAtPlatform = false;
 
-        if (Physics.Raycast(ray, out hit, shootRange))
+    interactionPromptText.text = ""; // Reset prompt every frame
+
+    if (Physics.Raycast(ray, out hit, shootRange))
+    {
+        if (hit.collider.TryGetComponent(out Turret turret))
         {
-            if (hit.collider.GetComponent<Turret>() != null)
-            {
-                isLookingAtTurret = true;
-            }
-            else if (hit.collider.GetComponent<TurretScrap>() != null)
-            {
-                isLookingAtScrap = true;
-            }
-            else if (hit.collider.GetComponent<TurretPlatform>()?.isActive == true)
-            {
-                isLookingAtPlatform = true;
-            }
+            isLookingAtTurret = true;
+            int cost = turret.GetUpgradeCost(); // Add this method to Turret.cs if you haven't already
+            interactionPromptText.text = $"[F] - Upgrade {cost}g\n[MB2] - Heal";
+        }
+        else if (hit.collider.TryGetComponent(out TurretScrap scrap))
+        {
+            isLookingAtScrap = true;
+            float repairCost = scrap.GetRepairCost(); // You’ll need to expose this
+            interactionPromptText.text = $"[F] - Repair {repairCost}g\n[R] - New Turret {turretCost}g";
+        }
+        else if (hit.collider.TryGetComponent<TurretPlatform>(out var platform) && platform.isActive)
+        {
+            isLookingAtPlatform = true;
+            interactionPromptText.text = $"[F] - Buy Turret {turretCost}g";
         }
     }
+}
 
     void Shoot()
     {
@@ -127,6 +142,14 @@ public class PlayerShooting : MonoBehaviour
             GameManager.Instance.gold -= turretCost;
         }
     }
+    void TryHealPlayer()
+{
+    if (playerHealth != null && Input.GetKey(KeyCode.LeftShift))
+    {
+        float healing = baseHealing + GameManager.Instance.GetTurretHealingBonus();
+        playerHealth.Heal(healing * Time.deltaTime); // Heal over time while holding Shift
+    }
+}
 
     void TryRepairTurret()
     {

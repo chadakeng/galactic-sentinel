@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI healthGainPopupText;
     public TextMeshProUGUI gunDamagePopupText;
     public TextMeshProUGUI gunDamageLabelText;
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI healingGainPopupText;
 
     private int playerBonusDamage = 0;
     private int turretHealingBonus = 0;
@@ -21,7 +23,7 @@ public class GameManager : MonoBehaviour
     private float scoreTimer = 0f;
     private PlayerHealth playerHealth; // Optional: if you have a player health system
     private PlayerShooting playerShooting; // Optional: if you have a player shooting system
-public TextMeshProUGUI playerHealingLabelText;
+    public TextMeshProUGUI playerHealingLabelText;
     void Awake()
     {
         if (Instance == null)
@@ -54,8 +56,12 @@ public TextMeshProUGUI playerHealingLabelText;
             gunDamageLabelText.text = $"Gun Damage: {totalDamage}";
 
             float totalHealing = playerShooting.GetBaseHealing() + turretHealingBonus;
-            playerHealingLabelText.text = $"Turret Healing: {totalHealing}";
-            
+            playerHealingLabelText.text = $"Regen amount: {totalHealing}";
+
+        }
+        if (scoreText != null)
+        {
+            scoreText.text = $"Score: {score}";
         }
     }
 
@@ -86,6 +92,7 @@ public TextMeshProUGUI playerHealingLabelText;
         turretHealingBonus += 1;
         playerMaxHealthBonus += 1;
         score += 5;
+        playerShooting.baseHealing += 10;
 
         Debug.Log($"Enemy killed! ➕DMG+{playerBonusDamage}, ➕Heal+{turretHealingBonus}, ➕HP+{playerMaxHealthBonus}");
         if (playerHealth != null)
@@ -108,10 +115,23 @@ public TextMeshProUGUI playerHealingLabelText;
                 float totalDamage = playerShooting.GetBaseDamage() + playerBonusDamage;
                 gunDamageLabelText.text = $"Gun Damage: {totalDamage}";
             }
+            // Show updated regen amount
+            if (playerHealingLabelText != null)
+            {
+                float totalHealing = playerShooting.GetBaseHealing() + turretHealingBonus;
+                playerHealingLabelText.text = $"Regen amount: {totalHealing}";
+            }
+
+            // Show "+10 Regen" popup
+            if (healingGainPopupText != null)
+            {
+                healingGainPopupText.GetComponent<FloatingStats>().Show("+10 Regen");
+            }
         }
     }
 
     public int GetPlayerBonusDamage() => playerBonusDamage;
     public int GetTurretHealingBonus() => turretHealingBonus;
     public int GetPlayerMaxHealthBonus() => playerMaxHealthBonus;
+
 }

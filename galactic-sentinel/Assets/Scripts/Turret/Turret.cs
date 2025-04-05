@@ -4,14 +4,14 @@ using System.Collections;
 
 public class Turret : MonoBehaviour
 {
-    public float health = 100f;
+    public float health = 300f;
     public float range = 10f;
     public float fireRate = 0.2f;
     public float damagePerShot = 5f;
     public ParticleSystem muzzleFlash;
 
     private float nextFireTime = 0f;
-    public int turretBaseCost = 50;
+    public int turretBaseCost = 200;
     public int upgradeCost = 20;
     public int upgradeLevel = 0;
     public int maxUpgradeLevel = 100;
@@ -141,8 +141,8 @@ public class Turret : MonoBehaviour
             TurretHealth turretHealth = GetComponent<TurretHealth>();
             if (turretHealth != null)
             {
-                turretHealth.maxHealth += 100f; // Increase max health by 10 per upgrade
-                turretHealth.Heal(turretHealth.maxHealth*0.5f); // Heal the turret by 50% of max health
+                turretHealth.maxHealth += Mathf.Max(200f, turretHealth.maxHealth * 0.5f);
+                turretHealth.Heal(turretHealth.maxHealth * 0.5f); // Heal the turret by 50% of max health
             }
             Debug.Log($"Turret upgraded to Level {upgradeLevel}!");
         }
@@ -171,8 +171,9 @@ public class Turret : MonoBehaviour
         if (muzzleFlash != null) muzzleFlash.Play();
         target.GetComponent<EnemyHealth>().TakeDamage(damagePerShot);
     }
-    int GetUpgradeCost()
+    public int GetUpgradeCost()
     {
-        return turretBaseCost + (upgradeCost * upgradeLevel * 2); // Doubles cost each level
+        return turretBaseCost + (upgradeCost * upgradeLevel * 2);
     }
+
 }

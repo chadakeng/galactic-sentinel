@@ -121,7 +121,6 @@ public class TurretScrap : MonoBehaviour
         }
         else
         {
-            Debug.Log("❌ Not enough gold to repair turret.");
             CancelRepair();
         }
     }
@@ -136,4 +135,8 @@ public class TurretScrap : MonoBehaviour
         Debug.Log($"Repair cost: {cost}");
         return cost;
     }
+    public float GetRepairCost()
+{
+    return upgradeCost * upgradeLevel * 0.8f;
+}
 }
