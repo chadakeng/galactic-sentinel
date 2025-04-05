@@ -6,6 +6,7 @@ public class PlayerShooting : MonoBehaviour
     public Camera playerCamera;
     public float shootRange = 50f;
     public float damage = 20f;
+    public float baseHealing = 10f;
     public LayerMask enemyLayer;
     public LayerMask turretPlatformLayer;
     public AudioSource gunSound;
@@ -27,51 +28,51 @@ public class PlayerShooting : MonoBehaviour
         // Show [F] Upgrade when looking at turret
         upgradePromptUI.SetActive(isLookingAtTurret);
 
-        if (Input.GetMouseButton(0) && Time.time >= nextTimeToShoot) 
+        if (Input.GetMouseButton(0) && Time.time >= nextTimeToShoot)
         {
             nextTimeToShoot = Time.time + fireRate;
             Shoot();
         }
 
-        if (Input.GetMouseButton(1)) 
+        if (Input.GetMouseButton(1))
         {
             TryRepairTurret();
         }
 
-        if (isLookingAtTurret) 
+        if (isLookingAtTurret)
         {
             Turret turret = hit.collider.GetComponent<Turret>();
 
-            if (Input.GetKeyDown(KeyCode.F)) 
+            if (Input.GetKeyDown(KeyCode.F))
             {
                 turret.StartUpgrade();
             }
-            else if (Input.GetKeyUp(KeyCode.F)) 
+            else if (Input.GetKeyUp(KeyCode.F))
             {
                 turret.CancelUpgrade();
             }
         }
 
-if (isLookingAtScrap)
-{
-    TurretScrap scrap = hit.collider.GetComponent<TurretScrap>();
-    if (Input.GetKey(KeyCode.F))
-    {
-        scrap?.StartRepair();
-    }
-    else
-    {
-        scrap?.CancelRepair();
-    }
+        if (isLookingAtScrap)
+        {
+            TurretScrap scrap = hit.collider.GetComponent<TurretScrap>();
+            if (Input.GetKey(KeyCode.F))
+            {
+                scrap?.StartRepair();
+            }
+            else
+            {
+                scrap?.CancelRepair();
+            }
 
-    if (Input.GetKeyDown(KeyCode.R))
-    {
-        Debug.Log("Replacing scrap with new turret");
-        ReplaceScrapWithNewTurret();
-    }
-}
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                Debug.Log("Replacing scrap with new turret");
+                ReplaceScrapWithNewTurret();
+            }
+        }
 
-        if (isLookingAtPlatform && Input.GetKeyDown(KeyCode.F)) 
+        if (isLookingAtPlatform && Input.GetKeyDown(KeyCode.F))
         {
             TrySpawnTurret();
         }
@@ -86,15 +87,15 @@ if (isLookingAtScrap)
 
         if (Physics.Raycast(ray, out hit, shootRange))
         {
-            if (hit.collider.GetComponent<Turret>() != null) 
+            if (hit.collider.GetComponent<Turret>() != null)
             {
                 isLookingAtTurret = true;
             }
-            else if (hit.collider.GetComponent<TurretScrap>() != null) 
+            else if (hit.collider.GetComponent<TurretScrap>() != null)
             {
                 isLookingAtScrap = true;
             }
-            else if (hit.collider.GetComponent<TurretPlatform>()?.isActive == true) 
+            else if (hit.collider.GetComponent<TurretPlatform>()?.isActive == true)
             {
                 isLookingAtPlatform = true;
             }
@@ -120,7 +121,7 @@ if (isLookingAtScrap)
     {
         if (GameManager.Instance.gold < turretCost) return;
 
-        if (hit.collider.GetComponent<TurretPlatform>() != null) 
+        if (hit.collider.GetComponent<TurretPlatform>() != null)
         {
             hit.collider.GetComponent<TurretPlatform>().SpawnTurret();
             GameManager.Instance.gold -= turretCost;
@@ -129,10 +130,11 @@ if (isLookingAtScrap)
 
     void TryRepairTurret()
     {
-        if (hit.collider.GetComponent<TurretHealth>() != null) 
+        if (hit.collider.GetComponent<TurretHealth>() != null)
         {
-float healing = 20f + GameManager.Instance.GetTurretHealingBonus();
-hit.collider.GetComponent<TurretHealth>()?.Heal(healing);        }
+            float healing = baseHealing + GameManager.Instance.GetTurretHealingBonus();
+            hit.collider.GetComponent<TurretHealth>()?.Heal(healing);
+        }
     }
 
     void ReplaceScrapWithNewTurret()
@@ -142,10 +144,17 @@ hit.collider.GetComponent<TurretHealth>()?.Heal(healing);        }
         TurretScrap scrap = hit.collider.GetComponent<TurretScrap>();
         if (scrap != null)
         {
-    GameManager.Instance.SpendGold(turretCost);
-    Vector3 spawnPosition = scrap.transform.position + Vector3.up * 0.5f;
-        Destroy(scrap.gameObject);
-    Instantiate(GameManager.Instance.turretPrefab, spawnPosition, Quaternion.identity);
+            GameManager.Instance.SpendGold(turretCost);
+            Vector3 spawnPosition = scrap.transform.position + Vector3.up * 0.5f;
+            Destroy(scrap.gameObject);
+            Instantiate(GameManager.Instance.turretPrefab, spawnPosition, Quaternion.identity);
         }
+    }
+    public float GetBaseDamage()
+    {
+        return damage;
+    }
+    public float GetBaseHealing(){
+        return baseHealing;
     }
 }

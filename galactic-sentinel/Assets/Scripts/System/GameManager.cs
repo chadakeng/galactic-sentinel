@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,16 +10,18 @@ public class GameManager : MonoBehaviour
 
     public int score = 0;
     public GameObject bonusTextPrefab;
-public Transform playerTransform; // Assign this in the Inspector (your Player's transform)
+    public TextMeshProUGUI healthGainPopupText;
+    public TextMeshProUGUI gunDamagePopupText;
+    public TextMeshProUGUI gunDamageLabelText;
 
     private int playerBonusDamage = 0;
     private int turretHealingBonus = 0;
     private int playerMaxHealthBonus = 0;
 
     private float scoreTimer = 0f;
-    private PlayerHealth player; // Optional: if you have a player health system
-    
-
+    private PlayerHealth playerHealth; // Optional: if you have a player health system
+    private PlayerShooting playerShooting; // Optional: if you have a player shooting system
+public TextMeshProUGUI playerHealingLabelText;
     void Awake()
     {
         if (Instance == null)
@@ -33,7 +36,8 @@ public Transform playerTransform; // Assign this in the Inspector (your Player's
 
     void Start()
     {
-        player = FindFirstObjectByType<PlayerHealth>(); // Only works if PlayerHealth is in the scene
+        playerHealth = FindFirstObjectByType<PlayerHealth>(); // Only works if PlayerHealth is in the scene
+        playerShooting = FindFirstObjectByType<PlayerShooting>(); // Only works if PlayerShooting is in the scene
     }
 
     void Update()
@@ -43,6 +47,15 @@ public Transform playerTransform; // Assign this in the Inspector (your Player's
         {
             score += 1;
             scoreTimer = 0f;
+        }
+        if (gunDamageLabelText != null && playerShooting != null)
+        {
+            float totalDamage = playerShooting.GetBaseDamage() + playerBonusDamage;
+            gunDamageLabelText.text = $"Gun Damage: {totalDamage}";
+
+            float totalHealing = playerShooting.GetBaseHealing() + turretHealingBonus;
+            playerHealingLabelText.text = $"Turret Healing: {totalHealing}";
+            
         }
     }
 
@@ -75,10 +88,26 @@ public Transform playerTransform; // Assign this in the Inspector (your Player's
         score += 5;
 
         Debug.Log($"Enemy killed! ➕DMG+{playerBonusDamage}, ➕Heal+{turretHealingBonus}, ➕HP+{playerMaxHealthBonus}");
-
-        if (player != null)
+        if (playerHealth != null)
         {
-            player.IncreaseMaxHealth(5); // Make sure this method exists in PlayerHealth
+            playerHealth.IncreaseMaxHealth(5);
+
+            // Trigger popups
+            if (healthGainPopupText != null)
+            {
+                healthGainPopupText.GetComponent<FloatingStats>().Show("+5 HP");
+            }
+
+            if (gunDamagePopupText != null)
+            {
+                gunDamagePopupText.GetComponent<FloatingStats>().Show("+1");
+            }
+
+            if (gunDamageLabelText != null)
+            {
+                float totalDamage = playerShooting.GetBaseDamage() + playerBonusDamage;
+                gunDamageLabelText.text = $"Gun Damage: {totalDamage}";
+            }
         }
     }
 
