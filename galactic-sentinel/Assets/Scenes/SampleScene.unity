@@ -3091,6 +3091,10 @@ PrefabInstance:
       propertyPath: gold
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 3712592051390011439, guid: eef26ee5ad443443ba0a34da80a352b5, type: 3}
+      propertyPath: turretPrefab
+      value: 
+      objectReference: {fileID: 8086679610181129756, guid: 456dccfa9f31e4ed8ab405326f785558, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
